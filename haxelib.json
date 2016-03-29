@@ -1,0 +1,7 @@
+{
+  "name": "generative-grammar",
+  "classPath": "./src",
+  "dependencies": {
+      "hxparse": ""
+  }
+}
