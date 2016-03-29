@@ -6,6 +6,7 @@ enum Tree<T> {
 
 class Generator {
     var rules :Map<String, Array<{ value :Null<Float>, results :Array<String> }>>;
+    var random_func :Void->Float = Math.random;
 
     public function new() {
         rules = new Map();
@@ -27,13 +28,17 @@ class Generator {
         rules[key].push(value);
     }
 
+    public function set_random(rand_func :Void->Float) {
+        random_func = rand_func;
+    }
+
     public function generate(symbol :String) :Tree<String> {
         var replacements = rules[symbol];
         if (replacements == null || replacements.length == 0) return Node(symbol, []);
 
         var value_sum = 0.0;
         for (r in replacements) value_sum += (r.value != null ? r.value : 1);
-        var random_value = value_sum * Math.random();
+        var random_value = value_sum * random_func();
         var summing = 0.0;
         var replacement = null;
         for (r in replacements) {
