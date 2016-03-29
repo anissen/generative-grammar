@@ -1,53 +1,66 @@
+import haxe.unit.TestRunner;
+
 class Test {
-    static public function main() {
-        function get_parser(s :String) {
-            var lexer = new GeneratorParser.Lexer(byte.ByteData.ofString(s));
-            var ts = new hxparse.LexerTokenSource(lexer, GeneratorParser.Lexer.tok);
-            return new GeneratorParser.Parser(ts);
-        }
+    static public function get_parser(s :String) {
+        var lexer = new GeneratorParser.Lexer(byte.ByteData.ofString(s));
+        var ts = new hxparse.LexerTokenSource(lexer, GeneratorParser.Lexer.tok);
+        return new GeneratorParser.Parser(ts);
+    }
 
-        function validate(s :String) {
+    static public function parse(s :String) {
+        try {
             var parser = get_parser(s);
-            try {
-                var parsed :Array<GeneratorParser.Expr> = parser.parse();
-                for (p in parsed) {
-                    var actual = GeneratorParser.StringEvaluator.eval(p);
-                    //trace(actual);
-                }
-            } catch (e :hxparse.ParserError) {
-                trace('Parse error', e);
-                trace('==> Validate failure: $s');
-            }
+            parser.parse();
+        } catch (e :hxparse.ParserError) {
+            return false;
         }
+        return true;
+    }
 
-        function invalidate(s :String) {
-            var parser = get_parser(s);
-            try {
-                var parsed :Array<GeneratorParser.Expr> = parser.parse();
-                trace('==> Invalidate failure: "$s":');
-                for (p in parsed) {
-                    var actual = GeneratorParser.StringEvaluator.eval(p);
-                    trace('----> $actual');
-                }
-            } catch (e :hxparse.ParserError) {
-                // ok
-            }
-        }
+    static function main() {
+        var r = new haxe.unit.TestRunner();
+        r.add(new ValidCases());
+        r.add(new InvalidCases());
+        r.run();
+    }
+}
 
+class ValidCases extends haxe.unit.TestCase {
+    function validate(s :String) {
+        assertTrue(Test.parse(s));
+    }
+
+    public function testBasic() {
         validate('Symbol => Symbol + terminal');
         validate('Symbol => terminal1');
         validate('Symbol => terminal_blah1 + terminal2 + terminal3');
-        trace('------------');
-        validate('# blah');
+    }
+
+    public function testMultiline() {
         validate("Symbol => Symbol1 + Symbol2\nSymbol1 => terminal");
+    }
+
+    public function testComments() {
+        validate('# blah');
         validate('# this is a comment\n\rSymbol => Symbol1 + Symbol2\nSymbol1 => terminal');
-        trace('------------');
+    }
+
+    public function testProbablities() {
         validate('Symbol [20]=> terminal1');
         validate('Symbol [12.3]=> terminal1');
         validate('Symbol [3.4567989]=> terminal1');
-        trace('------------');
+    }
+}
+
+class InvalidCases extends haxe.unit.TestCase {
+    function invalidate(s :String) {
+        assertFalse(Test.parse(s));
+    }
+
+    public function testBasic() {
         invalidate('Symbol => Symbol terminal');
         invalidate('Symbol => Symbol ++ terminal');
         invalidate('Symbol =>=> term');
+        invalidate('term => term2');
     }
 }
