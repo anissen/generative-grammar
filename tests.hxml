@@ -2,4 +2,3 @@
 -cp test
 -main Test
 -lib hxparse
--x bin/Test
