@@ -34,7 +34,6 @@ class Test {
             }
         }
 
-        // Symbol => Symbol | Terminal
         validate('Symbol => Symbol + terminal');
         validate('Symbol => terminal1');
         validate('Symbol => terminal_blah1 + terminal2 + terminal3');
