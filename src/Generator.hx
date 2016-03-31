@@ -1,11 +1,13 @@
 
+import GeneratorParser.Construct;
+
 enum Tree<T> {
     Leaf(v :T);
     Node(s :T, list :Array<Tree<T>>);
 }
 
 class Generator {
-    var rules :Map<String, Array<{ value :Null<Float>, results :Array<String> }>>;
+    var rules :Map<Construct, Array<{ probability :Null<Float>, children :Array<Construct> }>>;
     var random_func :Void->Float = Math.random;
 
     public function new() {
@@ -19,36 +21,36 @@ class Generator {
         var parsed :Array<GeneratorParser.Expr> = parser.parse();
         for (p in parsed) {
             var r = GeneratorParser.TypeEvaluator.eval(p);
-            add_rule(r.symbol, { value: r.value, results: r.results });
+            add_rule(r.node, { probability: r.probability, children: r.children });
         }
     }
 
-    public function add_rule(key :String, value :{ value :Null<Float>, results :Array<String> }) {
+    public function add_rule(key :Construct, probability :{ probability :Null<Float>, children :Array<Construct> }) {
         if (!rules.exists(key)) rules[key] = [];
-        rules[key].push(value);
+        rules[key].push(probability);
     }
 
     public function set_random(rand_func :Void->Float) {
         random_func = rand_func;
     }
 
-    public function generate(symbol :String) :Tree<String> {
+    public function generate(symbol :Construct) :Tree<Construct> {
         var replacements = rules[symbol];
-        if (replacements == null || replacements.length == 0) return Node(symbol, []);
+        if (replacements == null || replacements.length == 0) return Leaf(symbol);
 
-        var value_sum = 0.0;
-        for (r in replacements) value_sum += (r.value != null ? r.value : 1);
-        var random_value = value_sum * random_func();
+        var probability_sum = 0.0;
+        for (r in replacements) probability_sum += (r.probability != null ? r.probability : 1);
+        var random_probability = probability_sum * random_func();
         var summing = 0.0;
         var replacement = null;
         for (r in replacements) {
-            summing += (r.value != null ? r.value : 1);
-            if (summing < random_value) continue;
+            summing += (r.probability != null ? r.probability : 1);
+            if (summing < random_probability) continue;
             replacement = r;
             break;
         }
 
-        var children = [ for (r in replacement.results) generate(r) ];
+        var children = [ for (r in replacement.children) generate(r) ];
         return Node(symbol, children);
     }
 }

@@ -11,8 +11,13 @@ enum Token {
     TEol;
 }
 
+enum Construct {
+    Symbol(s :String);
+    Terminal(s :String);
+}
+
 enum Expr {
-    EGenerator(symbol :String, value :Null<Float>, results :Array<String>);
+    EGenerator(node :Construct, probability :Null<Float>, children :Array<Construct>);
 }
 
 class Lexer extends hxparse.Lexer implements hxparse.RuleBuilder {
@@ -38,49 +43,41 @@ class Parser extends hxparse.Parser<hxparse.LexerTokenSource<Token>, Token> impl
 
     function parseStatements(stm :Array<Expr>) :Array<Expr> {
         return switch stream {
-            case [TSymbol(s), v = parseValue(), TArrow, first = parseString(), rest = parseGenerators()]:
-                stm.push(EGenerator(s, v, [first].concat(rest)));
+            case [TSymbol(s), v = parseProbability(), TArrow, first = parseString(), rest = parseGenerators()]:
+                stm.push(EGenerator(Symbol(s), v, [first].concat(rest)));
                 parseStatements(stm);
             case [TEol]: parseStatements(stm);
             case [TEof]: stm;
         }
     }
 
-    function parseValue() :Null<Float> {
+    function parseProbability() :Null<Float> {
         return switch stream {
             case [TBracketOpen, TNumber(v), TBracketClose]: v;
             case _: null;
         }
     }
 
-    function parseGenerators() :Array<String> {
+    function parseGenerators() :Array<Construct> {
         return switch stream {
             case [TPlus, s = parseString(), e = parseGenerators()]: [s].concat(e);
             case [TEol]: [];
             case [TEof]: [];
         }
     }
-    
-    function parseString() :String {
-        return switch stream {
-            case [TSymbol(s)]: s;
-            case [TTerminal(s)]: s;
-        }
-    }
-}
 
-class StringEvaluator {
-    static public function eval(e :Expr) :String {
-        return switch(e) {
-            case EGenerator(s, v, r): '$s becomes $r' + (v != null ? ' with probability $v' : '');
+    function parseString() :Construct {
+        return switch stream {
+            case [TSymbol(s)]: Symbol(s);
+            case [TTerminal(s)]: Terminal(s);
         }
     }
 }
 
 class TypeEvaluator {
-    static public function eval(e :Expr) :Dynamic {
+    static public function eval(e :Expr) :{ node: Construct, probability :Null<Float>, children :Array<Construct> } {
         return switch(e) {
-            case EGenerator(s, v, r): { symbol: s, value: v, results: r };
+            case EGenerator(s, v, r): { node: s, probability: v, children: r };
         }
     }
 }

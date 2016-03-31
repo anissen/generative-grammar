@@ -7,7 +7,12 @@ class Main {
         SubQuest => GoTo + Retrieve
         SubQuest [0.5]=> SubQuest + SubQuest
         TalkTo => Person
+        Person => john
+        Person => carl
         GoTo => Location
+        Location => the_swamp
+        Location => the_mountains
+        Monster => orc
         Kill => Monster
         Kill => Person
         Reward => treasure
@@ -59,15 +64,16 @@ class Main {
             for (i in 0 ... size) s += ' ·';
             return s + ' ';
         }
-        function print(s :String, index :Int) {
-            //if (s.charAt(0) == s.charAt(0).toLowerCase()) trace(s); // only print lower-case strings
-            trace(pad(index) + s);
+        function print(c :GeneratorParser.Construct, index :Int, leaf :Bool = false) {
+            switch (c) {
+                case Symbol(s): trace(pad(index) + s + (leaf ? '[leaf]' : ''));
+                case Terminal(s): trace(pad(index) + s + ' (terminal)' + (leaf ? '[leaf]' : ''));
+            }
         }
-        function print_tree(t :Generator.Tree<String>, index :Int = 0) {
+        function print_tree(t :Generator.Tree<GeneratorParser.Construct>, index :Int = 0) {
             return switch (t) {
-                case Leaf(s): print(s, index);
+                case Leaf(s): print(s, index, true);
                 case Node(s, list): print(s, index); for (l in list) print_tree(l, index + 1);
-                default: trace('Invalid!', index);
             }
         }
 
@@ -76,7 +82,7 @@ class Main {
         generator.add_rules(quest_grammar);
         generator.add_rules(encounter_grammar);
 
-        var results_tree = generator.generate('Quest');
+        var results_tree = generator.generate(GeneratorParser.Construct.Symbol('Quest'));
         print_tree(results_tree);
     }
 }
