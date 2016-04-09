@@ -74,10 +74,21 @@ class Parser extends hxparse.Parser<hxparse.LexerTokenSource<Token>, Token> impl
     }
 }
 
-class TypeEvaluator {
-    static public function eval(e :Expr) :{ node: Construct, probability :Null<Float>, children :Array<Construct> } {
-        return switch(e) {
-            case EGenerator(s, v, r): { node: s, probability: v, children: r };
-        }
+class StringEvaluator {
+    static public function extract_value(c :Construct) :String {
+        return switch (c) {
+            case Symbol(s): s;
+            case Terminal(s): s;
+        };
+    }
+
+    static public function eval(e :Expr) :{ node: String, probability :Null<Float>, children :Array<String> } {
+        return switch (e) {
+            case EGenerator(construct, value, children): {
+                node: extract_value(construct),
+                probability: value,
+                children: [ for (child in children) extract_value(child) ]
+            };
+        };
     }
 }

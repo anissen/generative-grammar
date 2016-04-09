@@ -1,13 +1,6 @@
 
-import GeneratorParser.Construct;
-
-enum Tree<T> {
-    Leaf(v :T);
-    Node(s :T, list :Array<Tree<T>>);
-}
-
 class Generator {
-    var rules :Map<Construct, Array<{ probability :Null<Float>, children :Array<Construct> }>>;
+    var rules :Map<String, Array<{ probability :Null<Float>, children :Array<String> }>>;
     var random_func :Void->Float = Math.random;
 
     public function new() {
@@ -20,12 +13,12 @@ class Generator {
         var parser = new GeneratorParser.Parser(ts);
         var parsed :Array<GeneratorParser.Expr> = parser.parse();
         for (p in parsed) {
-            var r = GeneratorParser.TypeEvaluator.eval(p);
+            var r = GeneratorParser.StringEvaluator.eval(p);
             add_rule(r.node, { probability: r.probability, children: r.children });
         }
     }
 
-    public function add_rule(key :Construct, probability :{ probability :Null<Float>, children :Array<Construct> }) {
+    public function add_rule(key :String, probability :{ probability :Null<Float>, children :Array<String> }) {
         if (!rules.exists(key)) rules[key] = [];
         rules[key].push(probability);
     }
@@ -34,7 +27,7 @@ class Generator {
         random_func = rand_func;
     }
 
-    public function generate(symbol :Construct) :Tree<Construct> {
+    public function generate(symbol :String) :Tree<String> {
         var replacements = rules[symbol];
         if (replacements == null || replacements.length == 0) return Leaf(symbol);
 
