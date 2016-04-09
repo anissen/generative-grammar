@@ -65,4 +65,8 @@ class InvalidCases extends haxe.unit.TestCase {
         invalidate('Symbol =>=> term');
         invalidate('term => term2');
     }
+
+    public function testProbablities() {
+        invalidate('Symbol [-1]=> terminal');
+    }
 }
