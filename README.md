@@ -3,7 +3,22 @@ Parser and generator for a simple generative grammar
 
 _Disclaimer: Work-in-progress._
 
-## Grammar Syntax Examples
+## Grammar
+
+### Definitions:
+`<symbol>` := Capitalized word
+`<terminal>` := Lowercase word
+`<construct>` := `<symbol>` | `<terminal>`
+`<result>` := `<construct> + <result>` | `<construct>`
+`<probability>` := Positive number`
+
+### Syntax:
+`<symbol> => <result>`
+
+Including a probability (optional, defaults to 1):
+`<symbol> [<probability>]=> <result>`
+
+Syntax Examples:
 ```
 Symbol => Symbol + terminal
 Symbol => terminal1
@@ -18,6 +33,7 @@ Symbol [3.4567989]=> terminal1
 
 ## Example Grammars
 ### Quest
+Grammar:
 ```
 # generates a simple quest
 Quest => SubQuest + return + Reward
@@ -33,7 +49,45 @@ Reward [0.1]=> you_win
 Retrieve => treasure
 ```
 
+Example results:
+```
+Quest
+· SubQuest
+· · TalkTo
+· · · Person
+· · · · [ john ]
+· · Kill
+· · · Person
+· · · · [ carl ]
+· [ return ]
+· Reward
+· · [ you_win ]
+```
+
+```
+Quest
+· SubQuest
+· · SubQuest
+· · · TalkTo
+· · · · Person
+· · · · · [ john ]
+· · · Kill
+· · · · Monster
+· · · · · [ imp ]
+· · SubQuest
+· · · TalkTo
+· · · · Person
+· · · · · [ carl ]
+· · · Kill
+· · · · Monster
+· · · · · [ orc ]
+· [ return ]
+· Reward
+· · [ treasure ]
+```
+
 ### Map
+Grammar:
 ```
 Map => Region + Region
 Region => RegionType + RegionAffilication
@@ -52,6 +106,7 @@ House => casino
 ```
 
 ### Encounter
+Grammar:
 ```
 Encounter => Animals
 Encounter => druid + Animals
