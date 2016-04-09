@@ -1,3 +1,4 @@
+package generativegrammar;
 
 enum Tree<T> {
     Leaf(v :T);

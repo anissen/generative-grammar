@@ -1,3 +1,4 @@
+package generativegrammar;
 
 enum Token {
     TSymbol(s :String);

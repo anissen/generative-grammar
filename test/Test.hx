@@ -1,10 +1,12 @@
 import haxe.unit.TestRunner;
+import generativegrammar.GeneratorParser.Lexer;
+import generativegrammar.GeneratorParser.Parser;
 
 class Test {
     static public function get_parser(s :String) {
-        var lexer = new GeneratorParser.Lexer(byte.ByteData.ofString(s));
-        var ts = new hxparse.LexerTokenSource(lexer, GeneratorParser.Lexer.tok);
-        return new GeneratorParser.Parser(ts);
+        var lexer = new Lexer(byte.ByteData.ofString(s));
+        var ts = new hxparse.LexerTokenSource(lexer, Lexer.tok);
+        return new Parser(ts);
     }
 
     static public function parse(s :String) {

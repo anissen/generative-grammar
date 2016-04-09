@@ -1,3 +1,4 @@
+package generativegrammar;
 
 class Generator {
     var rules :Map<String, Array<{ probability :Null<Float>, children :Array<String> }>>;
