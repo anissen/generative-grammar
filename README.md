@@ -7,15 +7,20 @@ _Disclaimer: Work-in-progress._
 
 ### Definitions:
 `<symbol>` := Capitalized word
+
 `<terminal>` := Lowercase word
+
 `<construct>` := `<symbol>` | `<terminal>`
+
 `<result>` := `<construct> + <result>` | `<construct>`
+
 `<probability>` := Positive number`
 
 ### Syntax:
 `<symbol> => <result>`
 
 Including a probability (optional, defaults to 1):
+
 `<symbol> [<probability>]=> <result>`
 
 Syntax Examples:
