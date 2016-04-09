@@ -14,7 +14,7 @@ _Disclaimer: Work-in-progress._
 
 `<result>` := `<construct> + <result>` | `<construct>`
 
-`<probability>` := Positive number`
+`<probability>` := Positive number
 
 ### Syntax:
 `<symbol> => <result>`
@@ -22,6 +22,8 @@ _Disclaimer: Work-in-progress._
 Including a probability (optional, defaults to 1):
 
 `<symbol> [<probability>]=> <result>`
+
+Comments can be inserted starting with `#` and stopping at the end of the line.
 
 Syntax Examples:
 ```
