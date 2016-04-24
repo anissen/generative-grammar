@@ -78,6 +78,10 @@ class Main {
         generator.add_rules(quest_grammar);
         generator.add_rules(encounter_grammar);
 
+        generator.set_validation(function(s) {
+            if (s == 'Kill') return false; // pacifist mode; won't get any quests involving killing
+            return true; 
+        });
         var results_tree = generator.generate('Quest');
         print_tree(results_tree);
     }

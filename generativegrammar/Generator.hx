@@ -3,6 +3,7 @@ package generativegrammar;
 class Generator {
     var rules :Map<String, Array<{ probability :Null<Float>, children :Array<String> }>>;
     var random_func :Void->Float = Math.random;
+    var validation_func :String->Bool = null;
 
     public function new() {
         rules = new Map();
@@ -23,28 +24,45 @@ class Generator {
         if (!rules.exists(key)) rules[key] = [];
         rules[key].push(probability);
     }
+    
+    function get_replacements(key :String) :Array<{ probability :Null<Float>, children :Array<String> }> {
+        var replacements = rules[key];
+        if (replacements == null) return [];
+        if (validation_func == null) return replacements;
+        
+        var results = [];
+        for (r in replacements) { 
+            var valid_children = r.children.filter(validation_func);
+            if (valid_children.length > 0) results.push({ probability: r.probability, children: valid_children });
+        }
+        return results;
+    }
 
     public function set_random(rand_func :Void->Float) {
         random_func = rand_func;
     }
+    
+    public function set_validation(valid_func :String->Bool) {
+        validation_func = valid_func;
+    }
 
     public function generate(symbol :String) :Tree<String> {
-        var replacements = rules[symbol];
-        if (replacements == null || replacements.length == 0) return Leaf(symbol);
-
+        var replacements = get_replacements(symbol);
+        
         var probability_sum = 0.0;
-        for (r in replacements) probability_sum += (r.probability != null ? r.probability : 1);
+        for (r in replacements) {
+            probability_sum += (r.probability != null ? r.probability : 1);
+        }
         var random_probability = probability_sum * random_func();
         var summing = 0.0;
-        var replacement = null;
         for (r in replacements) {
             summing += (r.probability != null ? r.probability : 1);
             if (summing < random_probability) continue;
-            replacement = r;
-            break;
+            
+            var children = [ for (c in r.children) generate(c) ];
+            return Node(symbol, children);
         }
 
-        var children = [ for (r in replacement.children) generate(r) ];
-        return Node(symbol, children);
+        return Leaf(symbol);
     }
 }
