@@ -1,5 +1,5 @@
 {
-  "name": "generative-grammar",
+  "name": "generativegrammar",
   "classPath": "./src",
   "dependencies": {
       "hxparse": ""
