@@ -1,7 +1,7 @@
 package generativegrammar;
 
 class Generator {
-    var rules :Map<String, Array<{ probability :Null<Float>, children :Array<String> }>>;
+    var rules :Map<String, Array<{ probability :Array<GeneratorParser.AttributeType>, children :Array<String> }>>;
     var random_func :Void->Float = Math.random;
     var validation_func :String->Bool = null;
 
@@ -20,12 +20,12 @@ class Generator {
         }
     }
 
-    public function add_rule(key :String, probability :{ probability :Null<Float>, children :Array<String> }) {
+    public function add_rule(key :String, probability :{ probability :Array<GeneratorParser.AttributeType>, children :Array<String> }) {
         if (!rules.exists(key)) rules[key] = [];
         rules[key].push(probability);
     }
     
-    function get_replacements(key :String) :Array<{ probability :Null<Float>, children :Array<String> }> {
+    function get_replacements(key :String) :Array<{ probability :Array<GeneratorParser.AttributeType>, children :Array<String> }> {
         var replacements = rules[key];
         if (replacements == null) return [];
         if (validation_func == null) return replacements;
@@ -48,15 +48,33 @@ class Generator {
 
     public function generate(symbol :String) :Tree<String> {
         var replacements = get_replacements(symbol);
-        
+
         var probability_sum = 0.0;
         for (r in replacements) {
-            probability_sum += (r.probability != null ? r.probability : 1);
+            // hack...
+            var weight = 1.0;
+            for (p in r.probability) {
+                switch p {
+                    case PropertyAttribute(s, v): weight += v;
+                    default:
+                }
+            }
+            // ...hack
+            probability_sum += weight; //(r.probability.length > 0 ? r.probability[0].i : 1);
         }
         var random_probability = probability_sum * random_func();
         var summing = 0.0;
         for (r in replacements) {
-            summing += (r.probability != null ? r.probability : 1);
+            // hack...
+            var weight = 1.0;
+            for (p in r.probability) {
+                switch p {
+                    case PropertyAttribute(s, v): weight += v;
+                    default:
+                }
+            }
+            // ...hack
+            summing += weight; //(r.probability.length > 0 ? r.probability[0].i : 1);
             if (summing < random_probability) continue;
             
             var children = [ for (c in r.children) generate(c) ];

@@ -29,6 +29,7 @@ class Test {
 
 class ValidCases extends haxe.unit.TestCase {
     function validate(s :String) {
+        trace('validating $s');
         assertTrue(Test.parse(s));
     }
 
@@ -51,6 +52,10 @@ class ValidCases extends haxe.unit.TestCase {
         validate('Symbol [20]=> terminal1');
         validate('Symbol [12.3]=> terminal1');
         validate('Symbol [3.4567989]=> terminal1');
+    }
+
+    public function testMultipleAttributes() {
+        validate('Symbol [20,30]=> terminal1');
     }
 }
 

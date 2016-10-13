@@ -7,7 +7,7 @@ class Main {
         "Quest => SubQuest + return + Reward
         SubQuest => TalkTo + Kill
         SubQuest => GoTo + Retrieve
-        SubQuest [0.5]=> SubQuest + SubQuest
+        SubQuest [weight:0.5]=> SubQuest + SubQuest
         TalkTo => Person
         Person => john
         Person => carl
@@ -18,7 +18,7 @@ class Main {
         Kill => Monster
         Kill => Person
         Reward => treasure
-        Reward [0.1]=> you_win
+        Reward [weight:0.1]=> you_win
         #Reward => treasure + Reward
         Retrieve => treasure";
 
@@ -57,8 +57,16 @@ class Main {
         Monster => slime
         Chief => mage
         Chief => berserker
-        Bandits [0.5]=> Bandits + bandit
+        Bandits [weight:0.5][require:bosses>3]=> Bandits + bandit
         Bandits => bandit
+        ";
+
+        var boss_monster_grammar = "
+        BossMonster => Boss + Monsters
+        Boss => lich
+        Monsters => Monster + Monster 
+        Monster => imp
+        Monster => troll
         ";
 
         function pad(size :Int) {
@@ -77,12 +85,13 @@ class Main {
         generator.add_rules(map_grammar);
         generator.add_rules(quest_grammar);
         generator.add_rules(encounter_grammar);
+        generator.add_rules(boss_monster_grammar);
 
         generator.set_validation(function(s) {
             if (s == 'Kill') return false; // pacifist mode; won't get any quests involving killing
             return true; 
         });
-        var results_tree = generator.generate('Quest');
+        var results_tree = generator.generate('BossMonster');
         print_tree(results_tree);
     }
 }
